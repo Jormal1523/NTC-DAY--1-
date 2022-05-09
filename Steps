@@ -1,0 +1,115 @@
+<script src="https://unpkg.com/vue@3"></script>
+<div id="app">
+  <keep-alive>
+    <component :is="currentTab" @set-form="updateForm" @update="updateInfo" @update2="updateInfo2" @update3="updateInfo3" :form-data="form"></component>
+  </keep-alive>
+  <!--     <index-component></index-component>
+    <br>
+    <address-component></address-component>
+    <br>
+    <check-component></check-component> -->
+  
+</div>
+
+<script>
+  const app = Vue.createApp({
+    data(){
+      return{
+        tabs: ['index-component', 'address-component', 'check-component'],
+        currentTab: 'index-component',
+        form:{}
+      }
+    },
+    methods:{
+      updateForm(formName){
+        this.currentTab=formName;
+      },
+      updateInfo(value){
+        this.form['name']=value;
+        console.log(this.form)
+      },
+      updateInfo2(value){
+        this.form['phone']=value;
+        console.log(this.form)
+      },
+      updateInfo3(value){
+        this.form['address']=value;
+        console.log(this.form)
+      }
+    }
+  });
+  app.component('index-component', {
+    template:`
+    <div>姓名<input type="text" v-model="name"></div>
+    <div>電話<input type="text" v-model="phone"></div>
+    <button @click="nextStep()">下一步</button>
+    `,
+    data(){
+      return{
+        name:'',
+        phone:''
+      }
+    },
+    methods:{
+      nextStep(){
+        this.$emit('set-form','address-component')
+      }
+    },
+    watch:{
+      name:{
+        handler(value){
+          this.$emit('update',value)
+        }
+      },
+      phone:{
+        handler(value){
+          this.$emit('update2',value)
+        }
+      }
+    }
+  });
+  app.component('address-component', {
+    template:`
+    <div>地址<input type="text" v-model="address"></div>
+    <button @click="prevStep()">上一步</button>
+    <button @click="nextStep()">下一步</button>
+    `,
+    data(){
+      return{
+        address:''
+      }
+    },
+    methods:{
+      nextStep(){
+        this.$emit('set-form','check-component')
+      },
+      prevStep(){
+        this.$emit('set-form','index-component')
+      }
+    },
+    watch:{
+      address:{
+        handler(value){
+          this.$emit('update3',value)
+        }
+      }
+    },
+  });
+  app.component('check-component', {
+    template:`
+    <h1>請確認資料</h1>
+    <div>{{ formData['name'] }}</div>
+    <div>{{ formData['phone'] }}</div>
+    <div>{{ formData['address'] }}</div>
+    <button @click="prevStep()">上一步</button>
+    `,
+    props:['formData'],
+    methods:{
+      prevStep(){
+        this.$emit('set-form','address-component');
+      }
+    }
+  });
+  
+  app.mount('#app')
+</script>
